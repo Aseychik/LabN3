@@ -88,7 +88,7 @@ public class Item {
 
 public class Storage {
    // Массив предметов, хранимых в хранилище
-   private Storages.Item[] items;
+   private Item[] items;
 
    // Конструктор (инициализируется массив длины 0, так как склад изначально пустой)
    public Storage() {
