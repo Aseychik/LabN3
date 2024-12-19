@@ -334,7 +334,7 @@ public class Storage {
    общее количество товаров на складе, 
    процентное соотношение товара и два варианта вывода списка самых встречающихся товаров на складе.
 
-
+```java
     import java.io.PrintStream;
     import java.util.Scanner;
 
@@ -397,3 +397,4 @@ public class Storage {
         out.println("Вывод позиций склада, отсортированных по убыванию: \n" + new Storage(storage.largest()) + "\n" + storage);
       }
     }
+```
