@@ -335,15 +335,15 @@ public class Storage {
    процентное соотношение товара и два варианта вывода списка самых встречающихся товаров на складе.
 
 ```java
-    import java.io.PrintStream;
-    import java.util.Scanner;
+import java.io.PrintStream;
+import java.util.Scanner;
 
-    import Storages.Storage;
-    import Storages.Item;
+import Storages.Storage;
+import Storages.Item;
 
-    public class Main {
-    public static Scanner in = new Scanner(System.in);
-    public static PrintStream out = System.out;
+public class Main {
+public static Scanner in = new Scanner(System.in);
+public static PrintStream out = System.out;
 
     public static void main(String[] args) {
         // объект для управления складом
@@ -395,6 +395,6 @@ public class Storage {
         out.println("Процентное соотношение количества яблок к общему количеству предметов на складе: " + storage.percent("Яблоки"));
         // вывод списка всех позиций склада, отсортированных по убыванию и при этом сортирует по убыванию изначальный склад
         out.println("Вывод позиций склада, отсортированных по убыванию: \n" + new Storage(storage.largest()) + "\n" + storage);
-      }
-    }
+   }
+}
 ```
