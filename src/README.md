@@ -88,23 +88,29 @@ public class Item {
 
 public class Storage {
    // Массив предметов, хранимых в хранилище
-   private Storages.Item[] items;
+   private Item[] items;
+   // счётчик количества предметов на складе
+   private int lengthStorage;
+   // константа, отвечающая за количество изначально создаваемых слотов для элементов в массиве
+   private final int startcnt = 100;
 
    // Конструктор (инициализируется массив длины 0, так как склад изначально пустой)
    public Storage() {
-      items = new Item[0];
+      items = new Item[startcnt];
+      lengthStorage = 0;
    }
 
    // Конструктор хранилища с данными объектами
    public Storage(Item[] items) {
-      this.items = new Item[0];
+      this.items = new Item[startcnt];
+      lengthStorage = 0;
       addItem(items);
    }
 
    // Метод для нахождения позиции предмета в хранилище по названию, если предмета нет, возвращает -1
    public int posItem(String s) {
       int pos = -1;
-      for (int i = 0; i < items.length; i++)
+      for (int i = 0; i < lengthStorage; i++)
          if (items[i].name.equals(s)) pos = i;
       return pos;
    }
@@ -112,20 +118,22 @@ public class Storage {
    // Добавить объект типа Item в хранилище
    public void addItem(Item a) {
       // Если количество больше нуля, так как иначе ничего добавлять не нужно
-      if (a.count > 0) {
+      if (a != null && a.count > 0 && !a.name.isEmpty()) {
          // Поиск позиции в хранилище
          int pos = posItem(a.name);
          // Если в хранилище таких предметов нет, то добавляем
          if (pos == -1) {
-            // Создаётся массив, длина которого на 1 больше, чем длина изначального массива
-            Item[] tempArr = new Item[items.length + 1];
-            // Копирование элементов во временный массив
-            for (int i = 0; i < items.length; i++)
-               tempArr[i] = items[i];
-            // добавление в конец временного массива нового элемента
-            tempArr[items.length] = a;
-            // изменение массива хранимых объектов
-            items = tempArr.clone();
+            if (lengthStorage == items.length) {
+               Item[] tempArr = new Item[items.length + (int) (items.length / 3)];
+               for (int i = 0; i < items.length; i++)
+                  tempArr[i] = items[i];
+               tempArr[lengthStorage] = a;
+               lengthStorage += 1;
+               items = tempArr.clone();
+            } else {
+               items[lengthStorage] = a;
+               lengthStorage++;
+            }
          } else items[pos].count += a.count;
          // если такой предмет уже есть просто прибавляет к количеству данное количество
       }
@@ -152,10 +160,10 @@ public class Storage {
    @Override
    public String toString() {
       String s = "Склад пуст";
-      if (items.length != 0) {
+      if (lengthStorage != 0) {
          s = "";
          // Добавление в строку s объектов, хранимых на складе
-         for (int i = 0; i < items.length; i++) {
+         for (int i = 0; i < lengthStorage; i++) {
             // для красивого отображения первых предметов со склада
             if ('a' + i < 'z')
                s += "(" + (char) ('a' + i) + ") ";
@@ -171,20 +179,23 @@ public class Storage {
       // Если объект есть на складе
       if (posItem(s) != -1) {
          // Если при этом на складе только один объект - сделать пустым список хранимых объектов
-         if (items.length <= 1) items = new Item[0];
-         else {
+         if (lengthStorage <= 1) {
+            lengthStorage = 0;
+            items = new Item[startcnt];
+         } else {
             // создание временного списка, который на 1 меньше, чем изначальный
-            Item[] tempArr = new Item[items.length - 1];
+            Item[] tempArr = new Item[items.length];
             // переменная, используемая для сдвига при проходе по массиву
             int flag = 0;
             // Проход по индексам изначального списка
-            for (int i = 0; i < items.length; i++) {
+            for (int i = 0; i < lengthStorage; i++) {
                // Если встретили объект, который нужно удалить - просто не записываем его во временный массив
                // и прибавляем 1 к flag
                if (items[i].name.equals(s)) flag += 1;
                   // иначе добавляем объект во временный список
                else tempArr[i - flag] = items[i];
             }
+            lengthStorage -= flag;
             // Перезаписываем массив хранимых объектов
             items = tempArr.clone();
          }
@@ -217,31 +228,34 @@ public class Storage {
       // для удобства хранения данных используется класс Storage для того, чтобы было легче записывать предметы из диапазона
       Storage tempStorage = new Storage();
       // проход по всем предметам на складе, если их кл-во находится в заданном диапазоне - добавить их на склад
-      for (Item i : items) {
-         if (i.count >= begin && i.count <= end) tempStorage.addItem(i);
+      for (int i = 0; i < lengthStorage; i++) {
+         if (items[i].count >= begin && items[i].count <= end) tempStorage.addItem(items[i]);
       }
+      Item[] array = new Item[tempStorage.lengthStorage];
+      for (int i = 0; i < array.length; i++)
+         array[i] = tempStorage.items[i];
       // вернуть список предметов, хранимых на складе tempStorage
-      return tempStorage.items;
+      return array.clone();
    }
 
    // та же самая функция, но возвращает список подходящих предметов в виде строки
    public String getAsStringInCount(int begin, int end) {
       String s = "";
-      for (Item i : items) {
-         if (i.count >= begin && i.count <= end) s += i + "\n";
+      for (int i = 0; i < lengthStorage; i++) {
+         if (items[i].count >= begin && items[i].count <= end) s += items[i] + "\n";
       }
       return s;
    }
 
    // функция, которая возвращает список позиций на складе
    public int countItems() {
-      return items.length;
+      return lengthStorage;
    }
 
    // функция, которая возвращает общее количество предметов на складе
    public int countAllItems() {
       int cnt = 0;
-      for (Item i : items) cnt += i.count;
+      for (int i = 0; i < lengthStorage; i++) cnt += items[i].count;
       return cnt;
    }
 
@@ -257,7 +271,7 @@ public class Storage {
    // функция для сортировки склада
    public void sort() {
       // сортировка вставкой
-      for (int i = 1; i < items.length; i++) {
+      for (int i = 1; i < lengthStorage; i++) {
          int t = i;
          Item tempItem = items[i];
          while (t > 0 && items[t - 1].count < tempItem.count) {
@@ -272,7 +286,7 @@ public class Storage {
    public Item[] sorted() {
       // сортировка вставками
       Item[] tempArr = items.clone();
-      for (int i = 1; i < tempArr.length; i++) {
+      for (int i = 1; i < lengthStorage; i++) {
          int t = i;
          Item tempItem = tempArr[i];
          while (t > 0 && tempArr[t - 1].count < tempItem.count) {
@@ -287,7 +301,7 @@ public class Storage {
    // первые n наибольших предметов по их количеству
    public Item[] largest(int n) {
       // если n больше, чем предметов на складе, то будет выполняться также, как для n = количеству предметов
-      if (n > items.length) n = items.length;
+      if (n > lengthStorage) n = lengthStorage;
       // создаётся временный массив из n элементов
       Item[] sorted = new Item[n];
       // сортировка массива предметов
@@ -308,7 +322,7 @@ public class Storage {
    // та же функция, но не меняет массив предметов, хранимых на складе
    public Item[] largestN(int n) {
       // если n больше, чем предметов на складе, то будет выполняться также, как для n = количеству предметов
-      if (n > items.length) n = items.length;
+      if (n > lengthStorage) n = lengthStorage;
       // создаётся временный массив из n элементов
       Item[] sorted = new Item[n];
       // временный массив, являющийся отсортированным массивом предметов, хранящихся на складе
@@ -322,7 +336,11 @@ public class Storage {
 
    // возвращает отсортированный по количеству массив предметов, хранящихся на складе
    public Item[] largestN() {
-      return sorted();
+      Item[] sortedStorage = sorted();
+      Item[] tempI = new Item[lengthStorage];
+      for (int i = 0; i < lengthStorage; i++)
+         tempI[i] = sortedStorage[i];
+      return tempI;
    }
 }
 ```
